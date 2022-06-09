@@ -1,3 +1,5 @@
+// configurable script to block players from going ontop of the nether roof
+
 const SPAWN_PROTECTION = 5*60 // seconds of spawn protection
 const VOUCHER_PROTECTION = 5*60 // seconds of protection you get from vouchers
 const TELL_TIME = 10 // seconds of tell time (for the first warning message)
