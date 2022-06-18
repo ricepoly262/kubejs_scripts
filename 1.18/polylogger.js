@@ -3,29 +3,23 @@ var polylogger = {};
 polylogger.path = 'kubejs/data/polylogger/';
 polylogger.monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-const DEBUG = 0;
-const log = (str,DEBUG) => { if(DEBUG){console.log(str)} } // lol
-
 function readJson(type){
     let date = new Date();
     let filename = `${date.getDate()}_${polylogger.monthNames[date.getMonth()]}_${date.getFullYear()}`;
 
     let path = `${polylogger.path}${type}/`;
     let file = `${path}${filename}.json`;
-    log(`Reading JSON file ${file}`);
     let read = JsonIO.read(file);
 
 
-    if(read==null){
-        log(`JSON file ${path}${filename}.json does not exist!`);     
+    if(read==null){ 
 
         let data = {};
-        log(`Writing JSON file ${file}`);
         JsonIO.write(file, data);
 
         let test = JsonIO.read(`${file}.json`);
         if(test==null){
-            log(`Failed to write JSON file ${path}`);
+            return null
         }
         
     }
@@ -45,9 +39,6 @@ function writeJson(type,data,action){
     log[time].action = action;
     log[time].data = data;
     
-
-    log(`Writing JSON file ${file}`);
-    log(log);
     JsonIO.write(`${file}`, log);
 }
 
@@ -61,7 +52,7 @@ onEvent('item.entity_interact', event => {
         if(!ply.isFake()){
             let data = {};
             data.ply = ply.name.string;
-            data.target = target.name.string;
+            data.target = mob.name.string;
             data.item = item.id;
             data.playerpos = [Math.floor(ply.x),Math.floor(ply.y),Math.floor(ply.z),event.level.dimension];
             data.targetpos = [Math.floor(mob.x),Math.floor(mob.y),Math.floor(mob.z),event.level.dimension];
