@@ -3,42 +3,51 @@ var polylogger = {};
 polylogger.path = 'kubejs/data/polylogger/';
 polylogger.monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
+function fileNameFromDate(date,type){
+    let filename = `${date.getDate()}_${polylogger.monthNames[date.getMonth()]}_${date.getFullYear()}`;
+    return `${polylogger.path}${type}/${filename}.json`;
+}
+
+
 function readJson(type){
     let date = new Date();
-    let filename = `${date.getDate()}_${polylogger.monthNames[date.getMonth()]}_${date.getFullYear()}`;
+    let file = fileNameFromDate(date,type);
 
-    let path = `${polylogger.path}${type}/`;
-    let file = `${path}${filename}.json`;
+    console.log(`Reading JSON file ${file}`);
     let read = JsonIO.read(file);
 
 
-    if(read==null){ 
+    if(read==null){
+        console.log(`JSON file ${file} does not exist!`);     
 
         let data = {};
+        console.log(`Writing JSON file ${file}`);
         JsonIO.write(file, data);
 
-        let test = JsonIO.read(`${file}.json`);
+        let test = JsonIO.read(`${file}`);
         if(test==null){
-            return null
+            console.log(`Failed to write JSON file ${file}`);
+        }else{
+            return test;
         }
         
+    }else{
+        return read;
     }
 
-    return JsonIO.read(`${file}`);
 }
 
 function writeJson(type,data,action){
     let date = new Date();
     let time = `${date.getTime()} | ${date.getHours()}:00`;
-    let filename = `${date.getDate()}_${polylogger.monthNames[date.getMonth()]}_${date.getFullYear()}`;
+    let file = fileNameFromDate(date,type);
     let log = readJson(type);
-    let path = `${polylogger.path}${type}/`;
-    let file = `${path}${filename}.json`;
 
     log[time] = {};
     log[time].action = action;
     log[time].data = data;
     
+    console.log(`Writing JSON file ${file}`);
     JsonIO.write(`${file}`, log);
 }
 
@@ -52,7 +61,7 @@ onEvent('item.entity_interact', event => {
         if(!ply.isFake()){
             let data = {};
             data.ply = ply.name.string;
-            data.target = mob.name.string;
+            data.target = target.name.string;
             data.item = item.id;
             data.playerpos = [Math.floor(ply.x),Math.floor(ply.y),Math.floor(ply.z),event.level.dimension];
             data.targetpos = [Math.floor(mob.x),Math.floor(mob.y),Math.floor(mob.z),event.level.dimension];
