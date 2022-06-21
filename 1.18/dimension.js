@@ -25,7 +25,7 @@ function inBadDim(ply){ // check if players are in a bad dimension
 
     var rtn = false; // weird thing since returning inside forEach breaks anonymous function but not the parent function
 
-    if(ply.op && ALLOW_OPS){rtn = true;}
+    if(ply.op && ALLOW_OPS){rtn = false;}
 
     BLACKLIST.forEach(dimension => {
         if( dim == dimension ){
