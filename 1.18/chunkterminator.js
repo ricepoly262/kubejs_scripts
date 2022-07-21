@@ -5,7 +5,7 @@ var playerList = {};
 onEvent("player.logged_in", event => {
     let time = new Date().getDate()
     let ply = event.player.name.string
-    if(unloaded_checkPlayer(ply)){
+    if(unloader_checkPlayer(ply)){
         console.log(`[ChunkTerminator] Updating entry for ${ply}`);
         unloader_addPlayer(ply,time)
     }else{
