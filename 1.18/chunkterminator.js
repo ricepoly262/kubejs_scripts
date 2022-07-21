@@ -94,7 +94,7 @@ function unloader_unload(server,ply){ // unloads a player's chunks
     JsonIO.write(unloader_filepath, playerList);
     
     unloader_getPlayers();
-
+    console.log(`[ChunkTerminator] Unloading ${ply}`);
     server.runCommand(`ftbchunks unload_all ${ply}`)
     return (playerList[ply] == undefined);
 
