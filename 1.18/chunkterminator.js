@@ -1,3 +1,7 @@
+const unloader_filepath = 'kubejs/data/chunkterminator.json';
+var playerList = {};
+
+
 onEvent("player.logged_in", event => {
     let time = new Date().getDate()
     let ply = event.player.name.string
@@ -20,21 +24,20 @@ onEvent("world.load", event => {
     })
 
 })
-const unloader_filepath = 'kubejs/data/chunkterminator.json';
-var playerList = {};
 
 function unloader_getPlayers(){ // get all players
     console.log("[ChunkTerminator] Reading player list");
-    playerList = JsonIO.read(zjp_filepath) || {};
+    playerList = JsonIO.read(unloader_filepath) || {};
     if(playerList.equals({})){
         console.log("[ChunkTerminator] Error: No player list file found or file empty");
+        JsonIO.write(unloader_filepath, {});
     }else{
         console.log("[ChunkTerminator] Successfully read player list");
     }
 
 }
 
-function unloader_checkPlayer(ply){ // checks if a player exists
+function unloader_checkPlayer(ply){ // checks if a player exists on the list
     unloader_getPlayers();
 
     if( (playerList[ply] == undefined) || (playerList[ply] == null) || (playerList[ply].equals({})) ){
@@ -44,7 +47,7 @@ function unloader_checkPlayer(ply){ // checks if a player exists
     return true ;
 }
 
-function unloader_addPlayer(ply,time){
+function unloader_addPlayer(ply,time){ // adds a player to the list
     unloader_getPlayers();
 
     if( (playerList[ply] == undefined) || (playerList[ply] == null) || (playerList[ply].equals({})) ){
@@ -78,7 +81,7 @@ function unloader_addPlayer(ply,time){
 }
 
 
-function unloader_unload(server,ply){
+function unloader_unload(server,ply){ // unloads a player's chunks
     unloader_getPlayers();
 
     if( (playerList[ply] == undefined) || (playerList[ply] == null) || (playerList[ply].equals({})) ){
