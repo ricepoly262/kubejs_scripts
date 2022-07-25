@@ -28,7 +28,7 @@ onEvent("world.load", event => {
 function unloader_getPlayers(){ // get all players
     console.log("[ChunkTerminator] Reading player list");
     playerList = JsonIO.read(unloader_filepath) || {};
-    if(playerList.equals({})){
+    if(Object.keys(playerList).length<1){
         console.log("[ChunkTerminator] Error: No player list file found or file empty");
         JsonIO.write(unloader_filepath, {});
     }else{
