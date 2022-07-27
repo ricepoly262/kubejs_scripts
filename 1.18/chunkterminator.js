@@ -47,7 +47,7 @@ function unloader_getPlayers(){ // get all players
 function unloader_checkPlayer(ply){ // checks if a player exists on the list
     unloader_getPlayers();
 
-    if( (playerList[ply] == undefined) || (Object.keys(playerList).length==0) ){
+    if( (playerList[ply] == undefined) || (Object.keys(playerList[ply]).length==0) ){
         return false;
     }
 
@@ -57,7 +57,7 @@ function unloader_checkPlayer(ply){ // checks if a player exists on the list
 function unloader_addPlayer(ply,time){ // adds a player to the list
     unloader_getPlayers();
 
-    if( (playerList[ply] == undefined) || (Object.keys(playerList).length==0) ){
+    if( (playerList[ply] == undefined) || (Object.keys(playerList[ply]).length==0) ){
         playerList[ply] = {};
         playerList[ply].time = time;
     
@@ -91,7 +91,7 @@ function unloader_addPlayer(ply,time){ // adds a player to the list
 function unloader_unload(server,ply){ // unloads a player's chunks
     unloader_getPlayers();
 
-    if( (playerList[ply] == undefined) || (Object.keys(playerList).length==0) ){
+    if( (playerList[ply] == undefined) || (Object.keys(playerList[ply]).length==0) ){
         console.log("[ChunkTerminator] Error: No player list file found or file empty");
         return false;
     }
