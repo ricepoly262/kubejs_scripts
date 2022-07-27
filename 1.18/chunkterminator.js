@@ -1,34 +1,41 @@
 const unloader_filepath = 'kubejs/data/chunkterminator.json';
+const TIME_LIMIT = 259200; // https://www.unixtimestamp.com/
+
+
 var playerList = {};
 
 
-onEvent("player.logged_in", event => {
-    let time = new Date().getDate()
-    let ply = event.player.name.string
+onEvent("player.logged_in", event => { // update entry when player joins
+    let time = new Date();
+    let ply = event.player.name.string;
+
     if(unloader_checkPlayer(ply)){
         console.log(`[ChunkTerminator] Updating entry for ${ply}`);
-        unloader_addPlayer(ply,time)
+        unloader_addPlayer(ply,time);
     }else{
         console.log(`[ChunkTerminator] Player ${ply} has no entry`)
-        unloader_addPlayer(ply,time)
+        unloader_addPlayer(ply,time);
     }
 });
 
-onEvent("world.load", event => {
-    unloader_getPlayers()
-    let currentTime = new Date().getDate()
-    playerList.forEach( entry=> { 
-        let entryTime = entry.time
+onEvent("world.load", event => { // check for players to unload on world load 
+    unloader_getPlayers();
+    if(Object.keys(playerList).length>0){
+        let currentTime = new Date();
+        playerList.forEach( entry=> { 
+            let entryTime = entry.time;
 
-        if((currentTime-entryTime)>3){unloader_unload(event.server,entry)}
-    })
-
-})
+            if((currentTime-entryTime)>TIME_LIMIT){
+                unloader_unload(event.server,entry);
+            }
+        });
+    }
+});
 
 function unloader_getPlayers(){ // get all players
     console.log("[ChunkTerminator] Reading player list");
     playerList = JsonIO.read(unloader_filepath) || {};
-    if(Object.keys(playerList).length<1){
+    if(Object.keys(playerList).length==0){
         console.log("[ChunkTerminator] Error: No player list file found or file empty");
         JsonIO.write(unloader_filepath, {});
     }else{
@@ -40,7 +47,7 @@ function unloader_getPlayers(){ // get all players
 function unloader_checkPlayer(ply){ // checks if a player exists on the list
     unloader_getPlayers();
 
-    if( (playerList[ply] == undefined) || (playerList[ply] == null) || (playerList[ply].equals({})) ){
+    if( (playerList[ply] == undefined) || (Object.keys(playerList).length==0) ){
         return false;
     }
 
@@ -50,8 +57,8 @@ function unloader_checkPlayer(ply){ // checks if a player exists on the list
 function unloader_addPlayer(ply,time){ // adds a player to the list
     unloader_getPlayers();
 
-    if( (playerList[ply] == undefined) || (playerList[ply] == null) || (playerList[ply].equals({})) ){
-        playerList[ply] = {}
+    if( (playerList[ply] == undefined) || (Object.keys(playerList).length==0) ){
+        playerList[ply] = {};
         playerList[ply].time = time;
     
         JsonIO.write(unloader_filepath, playerList);
@@ -64,7 +71,7 @@ function unloader_addPlayer(ply,time){ // adds a player to the list
         }
         return false;
     }else{
-        let last = playerList[ply].time 
+        let last = playerList[ply].time;
         playerList[ply].time = time;
 
         JsonIO.write(unloader_filepath, playerList);
@@ -84,7 +91,7 @@ function unloader_addPlayer(ply,time){ // adds a player to the list
 function unloader_unload(server,ply){ // unloads a player's chunks
     unloader_getPlayers();
 
-    if( (playerList[ply] == undefined) || (playerList[ply] == null) || (playerList[ply].equals({})) ){
+    if( (playerList[ply] == undefined) || (Object.keys(playerList).length==0) ){
         console.log("[ChunkTerminator] Error: No player list file found or file empty");
         return false;
     }
@@ -95,8 +102,8 @@ function unloader_unload(server,ply){ // unloads a player's chunks
     
     unloader_getPlayers();
     console.log(`[ChunkTerminator] Unloading ${ply}`);
-    server.runCommand(`ftbchunks unload_all ${ply}`)
-    return (playerList[ply] == undefined);
+    server.runCommand(`ftbchunks unload_all ${ply}`);
+    return true;
 
 
 }
