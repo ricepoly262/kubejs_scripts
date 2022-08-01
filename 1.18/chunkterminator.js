@@ -1,9 +1,11 @@
 const unloader_filepath = 'kubejs/data/chunkterminator.json';
 const TIME_LIMIT = 259200; // https://www.unixtimestamp.com/
 
+const FORCER_filepath = 'kubejs/data/forcer.json'; 
+const FORCER_Integration = true; // if you are using F.O.R.C.E.R.
 
 var playerList = {};
-
+var unloadQueue = [];
 
 onEvent("player.logged_in", event => { // update entry when player joins
     let time = new Date();
@@ -102,8 +104,38 @@ function unloader_unload(server,ply){ // unloads a player's chunks
     
     unloader_getPlayers();
     console.log(`[ChunkTerminator] Unloading ${ply}`);
-    server.runCommand(`ftbchunks unload_all ${ply}`);
+    if(FORCER_Integration){
+        unloader_unloadAll_FORCER(ply);
+    }else{
+        server.runCommand(`ftbchunks unload_all ${ply}`);
+    }
     return true;
 
 
 }
+
+function unloader_unloadAll_FORCER(ply){
+    let allChunks = JsonIO.read(FORCER_filepath);
+
+    allChunks.forEach(entry =>{
+        if(entry.owner==ply){
+            unloadQueue.push([entry.x,entry.y]);
+            allChunks[ply] = undefined;
+        }
+    })
+
+    JsonIO.write(FORCER_filepath,allChunks);
+}
+
+onEvent("level.tick", event => {
+    if(unloadQueue.length>0){
+        let mclevel = event.level.minecraftLevel;
+        unloadQueue.forEach(chunk =>{
+            let x = chunk.x;
+            let z = chunk.z;
+            mclevel.setChunkForced(chunk.pos.x, chunk.pos.z, false);
+        })
+        unloadQueue = [];
+    }
+
+});
