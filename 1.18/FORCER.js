@@ -40,6 +40,7 @@ function FORCER_addChunk(chunkx,chunkz,ply,dimension){ // adds a chunk to the li
         chunkList[key] = {};
         chunkList[key].owner = ply;
         chunkList[key].dim = dimension;
+        chunkList[key].pos = [chunkx*16,chunkz*16]
     
         JsonIO.write(FORCER_filepath, chunkList);
         log(`${ply} force loaded chunk ${key} in ${dimension}`)
@@ -200,7 +201,7 @@ onEvent('block.place', e => {
                         let removed = FORCER_removeChunk(chunk.pos.x, chunk.pos.z, ply.name.string, dimension)
 
                         if(removed){
-                            mclevel.setChunkForced(chunk.pos.x, chunk.pos.z, true)
+                            mclevel.setChunkForced(chunk.pos.x, chunk.pos.z, false)
 
                             ply.persistentData.ForcerChunks = Math.min(ply.persistentData.ForcerChunks+1,ply.persistentData.ForcerChunkMax)
                             ply.tell(`Chunk unloaded! ${ply.persistentData.ForcerChunks} left.`)
@@ -237,4 +238,5 @@ onEvent("player.logged_in", (event) => { // If you increase the limit, give them
 });
 
 // todo: unload chunks if owner is offline
+// todo: add admin tools
 // event.level.dimension.toString()
