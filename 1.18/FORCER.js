@@ -7,9 +7,9 @@ const FORCER_Chunks = 9;
 
 let chunkList = {};
 
-const DEBUG = 0;
-const log = (str,DEBUG) => { if(DEBUG){console.log(`[F.O.R.C.E.R.] ${str}`)} } // lol
-const chunkwand = Item.of('minecraft:blaze_rod', "{display:{Lore:['[{\"text\":\"Forcefully\",\"italic\":false,\"color\":\"dark_red\",\"underlined\":true},{\"text\":\" \",\"underlined\":false},{\"text\":\"unloads a chunk.\",\"underlined\":false,\"color\":\"aqua\"}]'],Name:'[{\"text\":\"Chunk Wand\",\"italic\":false,\"bold\":true,\"color\":\"light_purple\"}]'}}").enchant('', 0)
+const DEBUG = 1;
+const log = (str,a) => { if(a||DEBUG){console.log(`[F.O.R.C.E.R.] ${str}`)} } // lol
+//const chunkwand = Item.of('minecraft:blaze_rod', "{display:{Lore:['[{\"text\":\"Forcefully\",\"italic\":false,\"color\":\"dark_red\",\"underlined\":true},{\"text\":\" \",\"underlined\":false},{\"text\":\"unloads a chunk.\",\"underlined\":false,\"color\":\"aqua\"}]'],Name:'[{\"text\":\"Chunk Wand\",\"italic\":false,\"bold\":true,\"color\":\"light_purple\"}]'}}").enchant('', 0)
 
 
 function FORCER_getChunks(ply){ // get all chunks (optionally specific player ones)
@@ -169,7 +169,7 @@ onEvent('block.place', e => {
 
             let valid_load = testForMultiblock(block,'minecraft:netherrack')
             if(valid_load){
-                ply.tell("VALID STRUCTURE!")
+                //ply.tell("VALID STRUCTURE!")
                 if(FORCER_canForceLoad(ply,chunk.pos.x,chunk.pos.z, dimension)){
                     let added = FORCER_addChunk(chunk.pos.x, chunk.pos.z, ply.name.string, dimension)
                     if(added){
@@ -180,7 +180,7 @@ onEvent('block.place', e => {
                         log(`${ply.name.string} force loaded chunk ${chunk.pos} in ${dimension}`)
                         voidMultiblock(block)
                     }else{
-                        ply.tell("Error: Contact Administrator: LN180") // just in case
+                        ply.tell("Error: Contact Administrator: FORCER_addChunk returned FALSE") // just in case
                     }
                 }else{
                     if(ply.persistentData.ForcerChunks==0){
@@ -210,7 +210,7 @@ onEvent('block.place', e => {
                             log(`${ply.name.string} unloaded chunk ${chunk.pos} in ${dimension}`)
                             voidMultiblock(block)
                         }else{
-                            ply.tell("Error: Contact Administrator: LN210") // just in case
+                            ply.tell("Error: Contact Administrator: FORCER_removeChunk returned FALSE") // just in case
                         }
                     }else{
                         ply.tell("You cannot unload a non loaded chunk!")
@@ -239,6 +239,7 @@ onEvent("player.logged_in", (event) => { // If you increase the limit, give them
     }
 });
 
+/**
 onEvent('server.custom_command', event => { // commands
     if(event.player.op){
         if (event.id == 'data'){ // show your persistent data
@@ -253,8 +254,9 @@ onEvent('server.custom_command', event => { // commands
          
     }
 
-})
+})*/
 
+/**
 onEvent('item.right_click', event => { // chunkwand
 
     let ply = event.player 
@@ -271,7 +273,8 @@ onEvent('item.right_click', event => { // chunkwand
             ply.tell("You cannot do that!");
         }
     }
-})
+})*/
+
 // todo: unload chunks if owner is offline
 // todo: admin tools
 // event.level.dimension.toString()

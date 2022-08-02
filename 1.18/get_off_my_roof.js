@@ -27,7 +27,7 @@ const check_interval_ms = CHECK_INTERVAL * 1000;
 const voucher_protection_ms = VOUCHER_PROTECTION * 1000;
 const DEBUG = 0;
 
-const log = (str,DEBUG) => { if(DEBUG){console.log(`[GetOffMyRoof] ${str}`)} } // lol
+const log = (str,a) => { if(a||DEBUG){console.log(`[GetOffMyRoof] ${str}`)} } // lol
 
 
 

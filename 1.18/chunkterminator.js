@@ -13,7 +13,7 @@ var playerList = {};
 var unloadQueue = [];
 
 const DEBUG = 0;
-const log = (str,DEBUG) => { if(DEBUG){console.log(`[ChunkTerminator] ${str}`)} } // lol
+const log = (str,a) => { if(a||DEBUG){console.log(`[ChunkTerminator] ${str}`)} } // lol
 
 onEvent("player.logged_in", event => { // update entry when player joins
     let time = new Date();
