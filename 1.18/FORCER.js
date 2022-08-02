@@ -1,6 +1,6 @@
 // Formal Overt Radical Chunk Existences Rememberer
 // Script that adds in chunk loading via shrine-ritual
-
+// Requires KubeJS Additions 2.0.2 -> https://www.curseforge.com/minecraft/mc-mods/kubejs-additions
 
 const FORCER_filepath = 'kubejs/data/forcer.json';
 const FORCER_Chunks = 9;
@@ -10,7 +10,7 @@ let chunkList = {};
 const DEBUG = 0;
 const log = (str,DEBUG) => { if(DEBUG){console.log(`[F.O.R.C.E.R.] ${str}`)} } // lol
 
-function FORCER_getChunks(){ // get all chunks
+function FORCER_getChunks(ply){ // get all chunks (optionally specific player ones)
     log("Reading player list");
     chunkList = JsonIO.read(FORCER_filepath) || {};
     if(Object.keys(chunkList).length==0){
@@ -18,53 +18,64 @@ function FORCER_getChunks(){ // get all chunks
         JsonIO.write(FORCER_filepath, {});
     }else{
         log("Successfully read chunk list");
+
+        if(ply){
+            let playerChunks = [];
+            chunkList.forEach(chunk=>{
+                if(chunk.owner==ply){
+                    playerChunks.push(chunk);
+                }
+            })
+            return playerChunks;
+        }
     }
 
 }
 
-function FORCER_addChunk(chunkx,chunkz,ply){ // adds a chunk to the list with a player owner 
+function FORCER_addChunk(chunkx,chunkz,ply,dimension){ // adds a chunk to the list with a player owner 
     FORCER_getChunks();
-    let key = chunkx+"-"+chunkz
+    let key = dimension+"|"+chunkx+"-"+chunkz
 
     if( (chunkList[key] == undefined) || (Object.keys(chunkList[key]).length==0) ){
         chunkList[key] = {};
         chunkList[key].owner = ply;
+        chunkList[key].dim = dimension;
     
         JsonIO.write(FORCER_filepath, chunkList);
-        log(`${ply} force loaded chunk ${key}`)
+        log(`${ply} force loaded chunk ${key} in ${dimension}`)
         return true;
     }else{
         // in theory this shouldn't happen ever.. FORCER_canForceLoad has checks for this.
-        log(`${ply} tried force loading chunk ${key} which is already loaded and owned by ${chunkList[key].owner}`)
+        log(`${ply} tried force loading chunk ${key} in ${dimension} which is already loaded and owned by ${chunkList[key].owner}`)
         return false;
     }
 }
 
-function FORCER_removeChunk(chunkx,chunkz,ply){ // removes a chunk to the list with a player owner 
+function FORCER_removeChunk(chunkx,chunkz,ply,dimension){ // removes a chunk to the list with a player owner 
     FORCER_getChunks();
-    let key = chunkx+"-"+chunkz
+    let key = dimension+"|"+chunkx+"-"+chunkz
 
     if( (chunkList[key] == undefined) || (Object.keys(chunkList[key]).length==0) ){
         // in theory this shouldn't happen ever.. FORCER_canUnload has checks for this.
-        log(`${ply} tried unloading chunk ${key} which is not loaded!`)
+        log(`${ply} tried unloading chunk ${key} in in ${dimension} which is not loaded!`)
         return false;
     }else{
         chunkList[key] = {};
         JsonIO.write(FORCER_filepath, chunkList);
-        log(`${ply} unloaded chunk ${key}`)
+        log(`${ply} unloaded chunk ${key} in ${dimension}`)
         return true;
        
     }
 }
 
-function FORCER_canForceLoad(ply,chunkx,chunkz){
+function FORCER_canForceLoad(ply,chunkx,chunkz,dimension){
     let chunksLeft = ply.persistentData.ForcerChunks;
     if(chunkx==undefined){
         return (chunksLeft>0);
     }
     else{
         FORCER_getChunks();
-        let key = chunkx+"-"+chunkz;
+        let key = dimension+"|"+chunkx+"-"+chunkz;
         let chunkAt = chunkList[key];
         if(chunkAt == undefined || (Object.keys(chunkAt).length==0)){
             return (chunksLeft>0);
@@ -73,13 +84,14 @@ function FORCER_canForceLoad(ply,chunkx,chunkz){
     }
 
 }
-function FORCER_canUnload(ply,chunkx,chunkz){
+function FORCER_canUnload(ply,chunkx,chunkz,dimension){
     if(chunkx==undefined){return false}
     else{
         FORCER_getChunks();
-        let key = chunkx+"-"+chunkz 
+        let key = dimension+"|"+chunkx+"-"+chunkz 
         let chunkAt = chunkList[key]
-        return (chunkAt.owner==ply)
+        if(chunkAt==undefined){return false}
+        else{return (chunkAt.owner==ply)}
     }
 
 }
@@ -117,6 +129,8 @@ function testForMultiblock(block,test){
 }
 
 function voidMultiblock(block){
+    return false;  // some removal function possibly (may make it configurable)
+
     let blocks = {}
     blocks.netherrack = block.down
     blocks.mossycobble = block.down.down
@@ -133,9 +147,11 @@ function voidMultiblock(block){
     blocks.gold7 = block.down.down.east  
     blocks.gold8 = block.down.down.west
 
-    blocks.forEach(b=>{
-        b.id == "minecraft:air"
-    })
+   
+
+    //blocks.forEach(b=>{
+    //    b.id == "minecraft:air"
+    //})
 }
 
 onEvent('block.place', e => {
@@ -146,20 +162,22 @@ onEvent('block.place', e => {
         if(block.id=='minecraft:fire' || block.id=='minecraft:soul_fire'){
             let mclevel = e.level.minecraftLevel
             let chunk = mclevel.getChunkAt(block.pos)
+            let dimension = e.level.dimension.toString()
 
             let valid_load = testForMultiblock(block,'minecraft:netherrack')
             if(valid_load){
                 ply.tell("VALID STRUCTURE!")
-                if(FORCER_canForceLoad(ply,chunk.pos.x,chunk.pos.z)){
-                    let added = FORCER_addChunk(chunk.pos.x, chunk.pos.z, ply.name.string)
+                if(FORCER_canForceLoad(ply,chunk.pos.x,chunk.pos.z, dimension)){
+                    let added = FORCER_addChunk(chunk.pos.x, chunk.pos.z, ply.name.string, dimension)
                     if(added){
                         mclevel.setChunkForced(chunk.pos.x, chunk.pos.z, true)
 
                         ply.persistentData.ForcerChunks = Math.max(ply.persistentData.ForcerChunks-1,0)
                         ply.tell(`Chunk loaded! ${ply.persistentData.ForcerChunks} left.`)
+                        log(`${ply.name.string} force loaded chunk ${chunk.pos} in ${dimension}`)
                         voidMultiblock(block)
                     }else{
-                        ply.tell("Error: Contact Administrator: LN159")
+                        ply.tell("Error: Contact Administrator: LN180") // just in case
                     }
                 }else{
                     if(ply.persistentData.ForcerChunks==0){
@@ -176,19 +194,20 @@ onEvent('block.place', e => {
 
                 if(valid_unload){
                     ply.tell("VALID STRUCTURE!")
-                    if(FORCER_canUnload(ply.name.string,chunk.pos.x,chunk.pos.z)){
+                    if(FORCER_canUnload(ply.name.string,chunk.pos.x,chunk.pos.z, dimension)){
 
 
-                        let removed = FORCER_removeChunk(chunk.pos.x, chunk.pos.z, ply.name.string)
+                        let removed = FORCER_removeChunk(chunk.pos.x, chunk.pos.z, ply.name.string, dimension)
 
                         if(removed){
                             mclevel.setChunkForced(chunk.pos.x, chunk.pos.z, true)
 
                             ply.persistentData.ForcerChunks = Math.min(ply.persistentData.ForcerChunks+1,ply.persistentData.ForcerChunkMax)
                             ply.tell(`Chunk unloaded! ${ply.persistentData.ForcerChunks} left.`)
+                            log(`${ply.name.string} unloaded chunk ${chunk.pos} in ${dimension}`)
                             voidMultiblock(block)
                         }else{
-                            ply.tell("Error: Contact Administrator: LN189")
+                            ply.tell("Error: Contact Administrator: LN210") // just in case
                         }
                     }else{
                         ply.tell("You cannot unload a non loaded chunk!")
@@ -216,3 +235,6 @@ onEvent("player.logged_in", (event) => { // If you increase the limit, give them
         }
     }
 });
+
+// todo: unload chunks if owner is offline
+// event.level.dimension.toString()
