@@ -1,6 +1,7 @@
-// configurable script to block players from specific dimensions
+// DimBlocker
+// Script to block players from specific dimensions
 
-const BLACKLIST = ['minecraft:the_end'] // list of blacklisted dimensions
+const BLACKLIST = ['minecraft:the_end'] // List of blacklisted dimensions, ex: ['minecraft:the_end','mod:dimension_name']
 
 const SAFE_DIM = 'minecraft:overworld' // the dimension the player will be teleported to 
 const SAFE_SPOT = [0,200,0] // the position the player will be teleported to
@@ -20,25 +21,23 @@ var scheduled = 0;
 
 
 function inBadDim(ply){ // check if players are in a bad dimension
-    let y = ply.y;
     let dim = ply.level.dimension;
 
     var rtn = false; // weird thing since returning inside forEach breaks anonymous function but not the parent function
-
-    if(ply.op && ALLOW_OPS){rtn = false;}
 
     BLACKLIST.forEach(dimension => {
         if( dim == dimension ){
             rtn = true;
        }
-
 	})
+
+    if(ply.op && ALLOW_OPS){rtn = false;}
     return rtn;
 }
 
 
 
-let schedule = (event) => event.server.schedule(check_interval_ms, () => { // main, checks player positions
+let schedule = (event) => event.server.schedule(check_interval_ms, () => { // Check player positions
 
     event.server.players.forEach(player => { // loop through every player  
         let x = inBadDim(player);
@@ -50,12 +49,12 @@ let schedule = (event) => event.server.schedule(check_interval_ms, () => { // ma
 
     })
 
-    schedule(event) // recursion
+    schedule(event) // Repeat
 
 })
 
 
-onEvent('server.tick', event => { // init
+onEvent('server.tick', event => { // Initialize, pass event to scheduled function
     if(scheduled == 0){
         schedule(event);
         scheduled = 1;

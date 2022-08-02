@@ -1,21 +1,29 @@
-const unloader_filepath = 'kubejs/data/chunkterminator.json';
-const TIME_LIMIT = 259200; // https://www.unixtimestamp.com/
+// Script to automatically unload a player's chunks some time after leaving
+// Works with FTBChunks and F.O.R.C.E.R.
 
-const FORCER_filepath = 'kubejs/data/forcer.json'; 
-const FORCER_Integration = true; // if you are using F.O.R.C.E.R.
+const unloader_filepath = 'kubejs/data/chunkterminator.json'; // Where the data will be written to
+const TIME_LIMIT = 259200; // Time limit before chunks get unloaded, https://www.unixtimestamp.com/
+
+const FORCER_filepath = ''; // F.O.R.C.E.R. filepath 
+const FORCER_Integration = false; // Enable F.O.R.C.E.R. Integration
+
+
 
 var playerList = {};
 var unloadQueue = [];
+
+const DEBUG = 0;
+const log = (str,DEBUG) => { if(DEBUG){console.log(`[ChunkTerminator] ${str}`)} } // lol
 
 onEvent("player.logged_in", event => { // update entry when player joins
     let time = new Date();
     let ply = event.player.name.string;
 
     if(unloader_checkPlayer(ply)){
-        console.log(`[ChunkTerminator] Updating entry for ${ply}`);
+        log(`Updating entry for ${ply}`);
         unloader_addPlayer(ply,time);
     }else{
-        console.log(`[ChunkTerminator] Player ${ply} has no entry`)
+        log(`Player ${ply} has no entry`)
         unloader_addPlayer(ply,time);
     }
 });
@@ -35,13 +43,13 @@ onEvent("world.load", event => { // check for players to unload on world load
 });
 
 function unloader_getPlayers(){ // get all players
-    console.log("[ChunkTerminator] Reading player list");
+    log("Reading player list");
     playerList = JsonIO.read(unloader_filepath) || {};
     if(Object.keys(playerList).length==0){
-        console.log("[ChunkTerminator] Error: No player list file found or file empty");
+        log("Error: No player list file found or file empty");
         JsonIO.write(unloader_filepath, {});
     }else{
-        console.log("[ChunkTerminator] Successfully read player list");
+        log("Successfully read player list");
     }
 
 }
@@ -68,7 +76,7 @@ function unloader_addPlayer(ply,time){ // adds a player to the list
         let check = unloader_checkPlayer(ply);
 
         if(check){
-            console.log(`[ChunkTerminator] entry added for ${ply}`);
+            log(`entry added for ${ply}`);
             return true;
         }
         return false;
@@ -81,7 +89,7 @@ function unloader_addPlayer(ply,time){ // adds a player to the list
         let check = unloader_checkPlayer(ply);
 
         if(check && (playerList[ply].time!==last) ){
-            console.log(`[ChunkTerminator] entry updated for ${ply}`);
+            log(`entry updated for ${ply}`);
             return true;
         }
         return false;
@@ -94,7 +102,7 @@ function unloader_unload(server,ply){ // unloads a player's chunks
     unloader_getPlayers();
 
     if( (playerList[ply] == undefined) || (Object.keys(playerList[ply]).length==0) ){
-        console.log("[ChunkTerminator] Error: No player list file found or file empty");
+        log("Error: No player list file found or file empty");
         return false;
     }
 
@@ -103,7 +111,7 @@ function unloader_unload(server,ply){ // unloads a player's chunks
     JsonIO.write(unloader_filepath, playerList);
     
     unloader_getPlayers();
-    console.log(`[ChunkTerminator] Unloading ${ply}`);
+    log(`Unloading ${ply}`);
     if(FORCER_Integration){
         unloader_unloadAll_FORCER(ply);
     }else{
@@ -114,7 +122,7 @@ function unloader_unload(server,ply){ // unloads a player's chunks
 
 }
 
-function unloader_unloadAll_FORCER(ply){
+function unloader_unloadAll_FORCER(ply){ // FORCER unloading 
     let allChunks = JsonIO.read(FORCER_filepath);
 
     allChunks.forEach(entry =>{
@@ -127,7 +135,7 @@ function unloader_unloadAll_FORCER(ply){
     JsonIO.write(FORCER_filepath,allChunks);
 }
 
-onEvent("level.tick", event => {
+onEvent("level.tick", event => { // Actually unload FORCER chunks
     if(unloadQueue.length>0){
         let mclevel = event.level.minecraftLevel;
         unloadQueue.forEach(chunk =>{

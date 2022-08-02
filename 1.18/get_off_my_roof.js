@@ -1,4 +1,6 @@
-// configurable script to block players from going ontop of the nether roof
+// Get Off My Roof!
+// Script to block players from going ontop of the nether roof with a multi-warn and time based system.
+
 
 const SPAWN_PROTECTION = 5*60 // seconds of spawn protection
 const VOUCHER_PROTECTION = 5*60 // seconds of protection you get from vouchers
@@ -12,7 +14,7 @@ const SAFE_SPOT = [0,200,0] // the position the player will be teleported to
 
 
 const voucher = Item.of('minecraft:paper', "{display:{Lore:['[{\"text\":\"Using this item will give you 5 minutes of time above the Nether roof.\",\"italic\":false,\"color\":\"aqua\"}]'],Name:'[{\"text\":\"5 Minute Nether Roof Bypass\",\"italic\":false,\"color\":\"light_purple\"}]'}}").enchant('', 0);
-const baton = Item.of('minecraft:stick', "{display:{Lore:['[{\"text\":\"Hitting players with this item will reset their nether data.\",\"italic\":false,\"color\":\"aqua\"}]'],Name:'[{\"text\":\"Baton\",\"italic\":false,\"color\":\"light_purple\"}]'}}").enchant('', 0);
+const baton = Item.of('minecraft:stick', "{display:{Lore:['[{\"text\":\"Hitting players with this item will reset their nether roof data.\",\"italic\":false,\"color\":\"aqua\"}]'],Name:'[{\"text\":\"Baton\",\"italic\":false,\"color\":\"light_purple\"}]'}}").enchant('', 0);
 
 
 
@@ -25,7 +27,7 @@ const check_interval_ms = CHECK_INTERVAL * 1000;
 const voucher_protection_ms = VOUCHER_PROTECTION * 1000;
 const DEBUG = 0;
 
-const log = (str,DEBUG) => { if(DEBUG){console.log(str)} } // lol
+const log = (str,DEBUG) => { if(DEBUG){console.log(`[GetOffMyRoof] ${str}`)} } // lol
 
 
 

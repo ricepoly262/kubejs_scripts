@@ -1,3 +1,4 @@
+// BackpacksJS
 // remove backpacks with duplicate IDs
 var backpacksjs = {};
 
