@@ -9,7 +9,7 @@ let chunkList = {};
 
 const DEBUG = 0;
 const log = (str,a) => { if(a||DEBUG){console.log(`[F.O.R.C.E.R.] ${str}`)} } // lol
-//const chunkwand = Item.of('minecraft:blaze_rod', "{display:{Lore:['[{\"text\":\"Forcefully\",\"italic\":false,\"color\":\"dark_red\",\"underlined\":true},{\"text\":\" \",\"underlined\":false},{\"text\":\"unloads a chunk.\",\"underlined\":false,\"color\":\"aqua\"}]'],Name:'[{\"text\":\"Chunk Wand\",\"italic\":false,\"bold\":true,\"color\":\"light_purple\"}]'}}").enchant('', 0)
+const chunkwand = Item.of('minecraft:blaze_rod', "{display:{Lore:['[{\"text\":\"Forcefully\",\"italic\":false,\"color\":\"dark_red\",\"underlined\":true},{\"text\":\" \",\"underlined\":false},{\"text\":\"unloads a chunk.\",\"underlined\":false,\"color\":\"aqua\"}]'],Name:'[{\"text\":\"Chunk Wand\",\"italic\":false,\"bold\":true,\"color\":\"light_purple\"}]'}}")
 
 
 function FORCER_getChunks(ply){ // get all chunks (optionally specific player ones)
@@ -196,7 +196,7 @@ onEvent('block.place', e => {
                 let valid_unload = testForMultiblock(block,'minecraft:soul_soil')
 
                 if(valid_unload){
-                    ply.tell("VALID STRUCTURE!")
+                    //ply.tell("VALID STRUCTURE!")
                     if(FORCER_canUnload(ply.name.string,chunk.pos.x,chunk.pos.z, dimension)){
 
 
@@ -239,7 +239,7 @@ onEvent("player.logged_in", (event) => { // If you increase the limit, give them
     }
 });
 
-/**
+
 onEvent('server.custom_command', event => { // commands
     if(event.player.op){
         if (event.id == 'data'){ // show your persistent data
@@ -254,9 +254,9 @@ onEvent('server.custom_command', event => { // commands
          
     }
 
-})*/
+})
 
-/**
+
 onEvent('item.right_click', event => { // chunkwand
 
     let ply = event.player 
@@ -273,7 +273,7 @@ onEvent('item.right_click', event => { // chunkwand
             ply.tell("You cannot do that!");
         }
     }
-})*/
+})
 
 // todo: unload chunks if owner is offline
 // todo: admin tools
