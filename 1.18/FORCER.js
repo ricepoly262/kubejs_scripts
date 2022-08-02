@@ -9,6 +9,8 @@ let chunkList = {};
 
 const DEBUG = 0;
 const log = (str,DEBUG) => { if(DEBUG){console.log(`[F.O.R.C.E.R.] ${str}`)} } // lol
+const chunkwand = Item.of('minecraft:blaze_rod', "{display:{Lore:['[{\"text\":\"Forcefully\",\"italic\":false,\"color\":\"dark_red\",\"underlined\":true},{\"text\":\" \",\"underlined\":false},{\"text\":\"unloads a chunk.\",\"underlined\":false,\"color\":\"aqua\"}]'],Name:'[{\"text\":\"Chunk Wand\",\"italic\":false,\"bold\":true,\"color\":\"light_purple\"}]'}}").enchant('', 0)
+
 
 function FORCER_getChunks(ply){ // get all chunks (optionally specific player ones)
     log("Reading player list");
@@ -237,6 +239,39 @@ onEvent("player.logged_in", (event) => { // If you increase the limit, give them
     }
 });
 
+onEvent('server.custom_command', event => { // commands
+    if(event.player.op){
+        if (event.id == 'data'){ // show your persistent data
+            event.player.tell("Data:");
+            let data = event.player.persistentData;
+            event.player.tell(data);
+        }  
+
+        if(event.id == 'forcer_chunkwand'){ // give chunkwand
+            event.player.give(chunkwand);
+        }     
+         
+    }
+
+})
+
+onEvent('item.right_click', event => { // chunkwand
+
+    let ply = event.player 
+    let mclevel = e.level.minecraftLevel
+    let chunk = mclevel.getChunkAt(ply.pos.x,ply.pos.z)
+    let dimension = e.level.dimension.toString()
+
+    if(event.item == chunkwand){
+        if(event.player.op){
+            FORCER_removeChunk(chunk.pos.x, chunk.pos.z, ply.name.string, dimension)
+            mclevel.setChunkForced(chunk.pos.x, chunk.pos.z, false)
+            ply.tell("Force Unloaded")
+        }else{
+            ply.tell("You cannot do that!");
+        }
+    }
+})
 // todo: unload chunks if owner is offline
-// todo: add admin tools
+// todo: admin tools
 // event.level.dimension.toString()
