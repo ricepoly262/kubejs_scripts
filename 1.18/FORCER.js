@@ -7,7 +7,7 @@ const FORCER_Chunks = 9;
 
 let chunkList = {};
 
-const DEBUG = 1;
+const DEBUG = 0;
 const log = (str,a) => { if(a||DEBUG){console.log(`[F.O.R.C.E.R.] ${str}`)} } // lol
 //const chunkwand = Item.of('minecraft:blaze_rod', "{display:{Lore:['[{\"text\":\"Forcefully\",\"italic\":false,\"color\":\"dark_red\",\"underlined\":true},{\"text\":\" \",\"underlined\":false},{\"text\":\"unloads a chunk.\",\"underlined\":false,\"color\":\"aqua\"}]'],Name:'[{\"text\":\"Chunk Wand\",\"italic\":false,\"bold\":true,\"color\":\"light_purple\"}]'}}").enchant('', 0)
 
