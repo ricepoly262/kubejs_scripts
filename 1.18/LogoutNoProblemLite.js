@@ -1,5 +1,5 @@
-// Logout, No Problem!
-// Fixes some server hang caused by logging into a base
+// Logout, No Problem! Lite
+// Ensures players log in at the correct position
 
 const logout_filepath = 'kubejs/data/logoutnoproblem.json'
 

@@ -27,7 +27,7 @@ const check_interval_ms = CHECK_INTERVAL * 1000;
 const voucher_protection_ms = VOUCHER_PROTECTION * 1000;
 const DEBUG = 0;
 
-const log = (str,a) => { if(a||DEBUG){console.log(`[GetOffMyRoof] ${str}`)} } // lol
+const ROOF_log = (str,a) => { if(a||DEBUG){console.log(`[GetOffMyRoof] ${str}`)} } // lol
 
 
 
@@ -41,19 +41,19 @@ function above(ply){ // check if players are above the nether
     let y = ply.y;
     let dim = ply.level.dimension;
 
-    log(`${ply.name}, Y ${Math.floor(y)} ${dim}`);
+    ROOF_log(`${ply.name}, Y ${Math.floor(y)} ${dim}`);
     if( (dim == 'minecraft:the_nether') && (y>=128) ){
-         log("Player is above the nether");
+         ROOF_log("Player is above the nether");
         return !(ply.op);
     }
-    log("Player is not above the nether");
+    ROOF_log("Player is not above the nether");
     return false;
 
 }
 
 
 function title(e,ply,a){ // first warning title (tells the player the nether roof is off limits)
-    log("Showing first title");
+    ROOF_log("Showing first title");
     e.server.runCommand(`/title ${ply.name} times 20 ${tell_time_ticks} 20`);
     e.server.runCommand(`/title ${ply.name} subtitle ["",{"text":"The Nether Roof is ","color":"red"},{"text":"OFF LIMITS","underlined":true,"color":"red"},{"text":".","color":"red"}]`);
     e.server.runCommand(`/title ${ply.name} title {"text":"WARNING","bold":true,"color":"dark_red"}`);
@@ -63,7 +63,7 @@ function title(e,ply,a){ // first warning title (tells the player the nether roo
 }
 
 let nextTitle = (event,ply) => event.server.schedule(tell_time_ms, () => { // second warning title (tells the player to leave)
-    log("Showing next title");
+    ROOF_log("Showing next title");
     event.server.runCommand(`/title ${ply.name} times 20 ${warn_time_ticks} 20`);
     event.server.runCommand(`/title ${ply.name} subtitle {"text":"Returning may result in loss of items.","color":"red"}`);
     event.server.runCommand(`/title ${ply.name} title {"text":"You have ${WARN_TIME/60} minutes to leave.","bold":true,"color":"dark_red"}`);
@@ -73,38 +73,38 @@ let nextTitle = (event,ply) => event.server.schedule(tell_time_ms, () => { // se
 })
 
 let finalCheck = (event,ply) => event.server.schedule(warn_time_ms, () => { // final check to see if they are still ontop of the nether roof
-    log("Doing final check");
+    ROOF_log("Doing final check");
     if(player.persistentData.nether_kill == false){
         if(above(ply) && (ply.persistentData.nether_warn == true)){
-            log("Teleporting player");
+            ROOF_log("Teleporting player");
             event.server.runCommand(`execute in ${SAFE_DIM} run tp ${ply.name} ${SAFE_SPOT[0]} ${SAFE_SPOT[1]} ${SAFE_SPOT[3]} `);
             event.server.runCommand(`/title ${ply.name} clear`);
             player.persistentData.nether_kill = true;
             player.tell("Returning to the Nether roof may result in loss of items.");
         }else if(!above(ply) && (ply.persistentData.nether_warn == true)){
-            log("Player returned");
+            ROOF_log("Player returned");
             event.server.runCommand(`/title ${ply.name} clear`);
             player.persistentData.nether_kill = true;
             player.tell("Thank you for staying below the nether roof. Returning may result in loss of items.");
         }
     }else{
-        log("Player kill is already true!");
+        ROOF_log("Player kill is already true!");
     }
 })
 
 let spawnProtection = (event,ply) => event.server.schedule(spawn_protection_ms, () => { // spawn protection
-    log("Removing voucher protection");
+    ROOF_log("Removing voucher protection");
     ply.persistentData.nether_protected = false;
 })
 
 let voucherProtection = (event,ply) => event.server.schedule(voucher_protection_ms, () => { // voucher protection
-    log("Removing voucher protection");
+    ROOF_log("Removing voucher protection");
     ply.persistentData.nether_protected = false;
 })
 
 let schedule = (event) => event.server.schedule(check_interval_ms, () => { // main, checks player positions
 
-    log("Tick!");
+    ROOF_log("Tick!");
 
     event.server.players.forEach(player => { // loop through every player
         let x = above(player);
@@ -116,22 +116,22 @@ let schedule = (event) => event.server.schedule(check_interval_ms, () => { // ma
             if(x && (warned == false)){
                 player.persistentData.nether_warn = true;
                 title(event,player,true);
-                log("Warning player");
+                ROOF_log("Warning player");
             }else if(x && (kill == true)){
                 player.kill()
-                log("Killing player");
+                ROOF_log("Killing player");
             }else if(x){
-                log("Player is warned but not killed");
+                ROOF_log("Player is warned but not killed");
             }
 
             if(!x && (warned == true) && (kill == false)){
-                log("Player returned");
+                ROOF_log("Player returned");
                 event.server.runCommand(`/title ${player.name} clear`)
                 player.persistentData.nether_kill = true;
                 player.tell("Thank you for staying below the nether roof. Returning may result in loss of items.");
             }
         }else{
-            log("Player has nether protection");
+            ROOF_log("Player has nether protection");
             if(x){
                 title(event,player,false);
             }
@@ -148,17 +148,17 @@ onEvent("player.logged_in", (event) => { // for spawn protections
     player.persistentData.nether_protected = false;
 
     if(above(player) && (player.persistentData.nether_warn == true) && (player.persistentData.nether_kill == false)){ // they logged out during the warning and are above the nether roof
-        log("Warning player");
+        ROOF_log("Warning player");
         title(event,player,true);
         player.persistentData.nether_protected = false;
     }else if(!above(player) && (player.persistentData.nether_warn == true) && (player.persistentData.nether_kill == false)){ // they logged out during the warning but were below the nether roof
-        log("Letting player off");
+        ROOF_log("Letting player off");
         player.persistentData.nether_warn = false;
         player.persistentData.nether_protected = false;
     }
 
     if(above(player) && (player.persistentData.nether_kill == true)){   // they logged out above the nether roof after being warned
-        log("Giving spawn protection");
+        ROOF_log("Giving spawn protection");
         player.persistentData.nether_kill = false; 
         player.persistentData.nether_protected = true;
         spawnProtection(event,player);
@@ -170,7 +170,7 @@ onEvent('server.tick', event => {
     if(nether_scheduled == 0){
         schedule(event);
         nether_scheduled = 1;
-        log("Initialized Script");
+        ROOF_log("Initialized Script");
     }
 })
 
@@ -204,7 +204,7 @@ onEvent('server.custom_command', event => { // commands
 onEvent('item.right_click', event => { // voucher protection, not usable by operators
     if(event.item == voucher){
         if(!event.player.op){
-            log("Giving protection");
+            ROOF_log("Giving protection");
             event.player.tell("You are now protected for the next 5 minutes.")
             player.persistentData.nether_warn = true;
             event.player.persistentData.nether_kill = false; 

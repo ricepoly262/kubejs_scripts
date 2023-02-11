@@ -1,6 +1,12 @@
 // Formal Overt Radical Chunk Existences Rememberer
 // Script that adds in chunk loading via shrine-ritual
-// Requires KubeJS Additions 2.0.2 -> https://www.curseforge.com/minecraft/mc-mods/kubejs-additions
+// Requires KubeJS Additions 2.0.2+ -> https://www.curseforge.com/minecraft/mc-mods/kubejs-additions
+
+
+// Currently BROKEN - Not currently working on 1.18 scripts
+// Currently BROKEN - Not currently working on 1.18 scripts
+// Currently BROKEN - Not currently working on 1.18 scripts
+
 
 const FORCER_filepath_chunks = 'kubejs/data/forcer_chunks.json';
 const FORCER_filepath_players = 'kubejs/data/forcer_players.json';
@@ -8,7 +14,7 @@ const FORCER_Chunks = 9;
 
 
 const DEBUG = 0;
-const log = (str,a) => { if(a||DEBUG){console.log(`[F.O.R.C.E.R.] ${str}`)} } // lol
+const FORCER_log = (str,a) => { if(a||DEBUG){console.log(`[F.O.R.C.E.R.] ${str}`)} } // lol
 const chunkwand = Item.of('minecraft:blaze_rod', "{display:{Lore:['[{\"text\":\"Forcefully\",\"italic\":false,\"color\":\"dark_red\",\"underlined\":true},{\"text\":\" \",\"underlined\":false},{\"text\":\"unloads a chunk.\",\"underlined\":false,\"color\":\"aqua\"}]'],Name:'[{\"text\":\"Chunk Wand\",\"italic\":false,\"bold\":true,\"color\":\"light_purple\"}]'}}");
 
 function isValid(obj){
@@ -17,6 +23,7 @@ function isValid(obj){
     if(obj == null){ return false; }
     return Object.keys(chunkList).length>0;
 }
+
 function getCachedName(ply){ 
     if(!isValid(ply.persistentData.CachedName)){
         ply.persistentData.CachedName = ply.name.string;
@@ -26,14 +33,14 @@ function getCachedName(ply){
 
 
 function FORCER_getChunks(ply){ // get all chunks (optionally specific player ones)
-    log("Reading chunk list");
+    FORCER_log("Reading chunk list");
     let chunkList = JsonIO.read(FORCER_filepath_chunks) || {};
     if(!isValid(chunkList)){
-        log("Error: No list file found or file empty");
+        FORCER_log("Error: No list file found or file empty");
         JsonIO.write(FORCER_filepath_chunks, {});
         return {};
     }else{
-        log("Successfully read chunk list");
+        FORCER_log("Successfully read chunk list");
 
         if(ply){
             let playerChunks = [];
@@ -50,10 +57,10 @@ function FORCER_getChunks(ply){ // get all chunks (optionally specific player on
 }
 
 function FORCER_getPlayers(ply){ // get all player data (optionally specific players)
-    log("Reading player list");
+    FORCER_log("Reading player list");
     let playerList = JsonIO.read(FORCER_filepath_players) || {};
     if(isValid(playerList)){
-        log("Successfully read player list");
+        FORCER_log("Successfully read player list");
 
         if(ply){
             if(isValid(playerList[ply])){return playerList[ply]}
@@ -62,7 +69,7 @@ function FORCER_getPlayers(ply){ // get all player data (optionally specific pla
             return playerList;
         }
     }else{
-        log("Error: No list file found or file empty");
+        FORCER_log("Error: No list file found or file empty");
         JsonIO.write(FORCER_filepath_players, {});
         return {};
     }
@@ -103,11 +110,11 @@ function FORCER_addChunk(chunkx,chunkz,ply,dimension){ // adds a chunk to the li
         chunkList[key].pos = [chunkx*16,chunkz*16]
     
         JsonIO.write(FORCER_filepath_chunks, chunkList);
-        log(`${ply} force loaded chunk ${key} in ${dimension}`)
+        FORCER_log(`${ply} force loaded chunk ${key} in ${dimension}`)
         return true;
     }else{
         // in theory this shouldn't happen ever..
-        log(`${ply} tried force loading chunk ${key} in ${dimension} which is already loaded and owned by ${chunkList[key].owner}`)
+        FORCER_log(`${ply} tried force loading chunk ${key} in ${dimension} which is already loaded and owned by ${chunkList[key].owner}`)
         return false;
     }
 }
@@ -119,11 +126,11 @@ function FORCER_removeChunk(chunkx,chunkz,ply,dimension){ // removes a chunk fro
     if(isValid(chunkList[key])){
         chunkList[key] = {};
         JsonIO.write(FORCER_filepath_chunks, chunkList);
-        log(`${ply} unloaded chunk ${key} in ${dimension}`)
+        FORCER_log(`${ply} unloaded chunk ${key} in ${dimension}`)
         return true;
     }else{
         // in theory this shouldn't happen ever
-        log(`${ply} tried unloading chunk ${key} in in ${dimension} which is not loaded!`)
+        FORCER_log(`${ply} tried unloading chunk ${key} in in ${dimension} which is not loaded!`)
         return false;
     }
 }
@@ -140,7 +147,7 @@ function FORCER_canForceLoad(ply,chunkx,chunkz,dimension,cl){
             chunksLeft = data.ChunksLeft;
         }
         else{
-            log("Error: Player data empty"); 
+            FORCER_log("Error: Player data empty"); 
         }
     }
 
@@ -249,7 +256,7 @@ onEvent('block.place', e => {
 
                         ply.persistentData.ForcerChunks = Math.max(ply.persistentData.ForcerChunks-1,0)
                         ply.tell(`Chunk loaded! ${ply.persistentData.ForcerChunks} left.`)
-                        log(`${ply.name.string} force loaded chunk ${chunk.pos} in ${dimension}`)
+                        FORCER_log(`${ply.name.string} force loaded chunk ${chunk.pos} in ${dimension}`)
                     }else{
                         ply.tell("Error: Contact Administrator: FORCER_addChunk returned FALSE") // just in case
                     }
@@ -277,7 +284,7 @@ onEvent('block.place', e => {
 
                             ply.persistentData.ForcerChunks = Math.min(ply.persistentData.ForcerChunks+1,ply.persistentData.ForcerChunkMax)
                             ply.tell(`Chunk unloaded! ${ply.persistentData.ForcerChunks} left.`)
-                            log(`${getCachedName(ply)} unloaded chunk ${chunk.pos} in ${dimension}`)
+                            FORCER_log(`${getCachedName(ply)} unloaded chunk ${chunk.pos} in ${dimension}`)
                             //voidMultiblock(block)
                         }else{
                             ply.tell("Error: Contact Administrator: FORCER_removeChunk returned FALSE") // just in case

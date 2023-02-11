@@ -4,8 +4,10 @@
 const unloader_filepath = 'kubejs/data/chunkterminator.json'; // Where the data will be written to
 const TIME_LIMIT = 259200; // Time limit before chunks get unloaded, https://www.unixtimestamp.com/
 
-const FORCER_filepath = ''; // F.O.R.C.E.R. filepath 
-const FORCER_Integration = false; // Enable F.O.R.C.E.R. Integration
+
+// FORCER Integration Currently BROKEN - Not currently working on 1.18 scripts
+//const FORCER_filepath = ''; // F.O.R.C.E.R. filepath 
+//const FORCER_Integration = false; // Enable F.O.R.C.E.R. Integration
 
 
 
@@ -13,17 +15,17 @@ var playerList = {};
 var unloadQueue = [];
 
 const DEBUG = 0;
-const log = (str,a) => { if(a||DEBUG){console.log(`[ChunkTerminator] ${str}`)} } // lol
+const chunkterminator_log = (str,a) => { if(a||DEBUG){console.log(`[ChunkTerminator] ${str}`)} } // lol
 
 onEvent("player.logged_in", event => { // update entry when player joins
     let time = new Date();
     let ply = event.player.name.string;
 
     if(unloader_checkPlayer(ply)){
-        log(`Updating entry for ${ply}`);
+        chunkterminator_log(`Updating entry for ${ply}`);
         unloader_addPlayer(ply,time);
     }else{
-        log(`Player ${ply} has no entry`)
+        chunkterminator_log(`Player ${ply} has no entry`)
         unloader_addPlayer(ply,time);
     }
 });
@@ -43,13 +45,13 @@ onEvent("world.load", event => { // check for players to unload on world load
 });
 
 function unloader_getPlayers(){ // get all players
-    log("Reading player list");
+    chunkterminator_log("Reading player list");
     playerList = JsonIO.read(unloader_filepath) || {};
     if(Object.keys(playerList).length==0){
-        log("Error: No player list file found or file empty");
+        chunkterminator_log("Error: No player list file found or file empty");
         JsonIO.write(unloader_filepath, {});
     }else{
-        log("Successfully read player list");
+        chunkterminator_log("Successfully read player list");
     }
 
 }
@@ -76,7 +78,7 @@ function unloader_addPlayer(ply,time){ // adds a player to the list
         let check = unloader_checkPlayer(ply);
 
         if(check){
-            log(`entry added for ${ply}`);
+            chunkterminator_log(`entry added for ${ply}`);
             return true;
         }
         return false;
@@ -89,7 +91,7 @@ function unloader_addPlayer(ply,time){ // adds a player to the list
         let check = unloader_checkPlayer(ply);
 
         if(check && (playerList[ply].time!==last) ){
-            log(`entry updated for ${ply}`);
+            chunkterminator_log(`entry updated for ${ply}`);
             return true;
         }
         return false;
@@ -102,7 +104,7 @@ function unloader_unload(server,ply){ // unloads a player's chunks
     unloader_getPlayers();
 
     if( (playerList[ply] == undefined) || (Object.keys(playerList[ply]).length==0) ){
-        log("Error: No player list file found or file empty");
+        chunkterminator_log("Error: No player list file found or file empty");
         return false;
     }
 
@@ -111,17 +113,17 @@ function unloader_unload(server,ply){ // unloads a player's chunks
     JsonIO.write(unloader_filepath, playerList);
     
     unloader_getPlayers();
-    log(`Unloading ${ply}`);
-    if(FORCER_Integration){
-        unloader_unloadAll_FORCER(ply);
-    }else{
+    chunkterminator_log(`Unloading ${ply}`);
+    //if(FORCER_Integration){
+    //    unloader_unloadAll_FORCER(ply);
+    //}else{
         server.runCommand(`ftbchunks unload_all ${ply}`);
-    }
+    //}
     return true;
 
 
 }
-
+/* 
 function unloader_unloadAll_FORCER(ply){ // FORCER unloading 
     let allChunks = JsonIO.read(FORCER_filepath);
 
@@ -146,4 +148,4 @@ onEvent("level.tick", event => { // Actually unload FORCER chunks
         unloadQueue = [];
     }
 
-});
+});*/
