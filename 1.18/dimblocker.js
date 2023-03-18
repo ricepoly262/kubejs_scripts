@@ -1,62 +1,63 @@
 // DimBlocker
 // Script to block players from specific dimensions
+var DimBlocker = {};
 
-const BLACKLIST = ['minecraft:the_end'] // List of blacklisted dimensions, ex: ['minecraft:the_end','mod:dimension_name']
+DimBlocker.BLACKLIST = ['minecraft:the_end'] // List of blacklisted dimensions, ex: ['minecraft:the_end','mod:dimension_name']
 
-const SAFE_DIM = 'minecraft:overworld' // the dimension the player will be teleported to 
-const SAFE_SPOT = [0,200,0] // the position the player will be teleported to
+DimBlocker.SAFE_DIM = 'minecraft:overworld' // the dimension the player will be teleported to 
+DimBlocker.SAFE_SPOT = [0,200,0] // the position the player will be teleported to
 
-const ALLOW_OPS = true; // allow operators to enter blacklisted dimensions
+DimBlocker.ALLOW_OPS = true; // allow operators to enter blacklisted dimensions
 
-const CHECK_INTERVAL = 5 // how often in seconds it checks player positions
-
-
-
+DimBlocker.CHECK_INTERVAL = 5 // how often in seconds it checks player positions
 
 
 
 
-const check_interval_ms = CHECK_INTERVAL * 1000;
-var scheduled = 0;
 
 
-function inBadDim(ply){ // check if players are in a bad dimension
+
+DimBlocker.check_interval_ms = DimBlocker.CHECK_INTERVAL * 1000;
+DimBlocker.scheduled = 0;
+
+
+DimBlocker.inBadDim = (ply) => { // check if players are in a bad dimension
     let dim = ply.level.dimension;
 
-    var rtn = false; // weird thing since returning inside forEach breaks anonymous function but not the parent function
+    var rtn = false; // returning inside forEach breaks anonymous function but not the parent function
 
-    BLACKLIST.forEach(dimension => {
+    DimBlocker.BLACKLIST.forEach(dimension => {
         if( dim == dimension ){
             rtn = true;
        }
 	})
 
-    if(ply.op && ALLOW_OPS){rtn = false;}
+    if(ply.op && DimBlocker.ALLOW_OPS){rtn = false;}
     return rtn;
 }
 
 
 
-let schedule = (event) => event.server.schedule(check_interval_ms, () => { // Check player positions
+DimBlocker.schedule = (event) => event.server.schedule(DimBlocker.check_interval_ms, () => { // Check player positions
 
     event.server.players.forEach(player => { // loop through every player  
-        let x = inBadDim(player);
+        let x = DimBlocker.inBadDim(player);
 
         if(x){
-            event.server.runCommandSilent(`execute in ${SAFE_DIM} run tp ${player.name.string} ${SAFE_SPOT[0]} ${SAFE_SPOT[1]} ${SAFE_SPOT[2]}`);
+            event.server.runCommandSilent(`execute in ${DimBlocker.SAFE_DIM} run tp ${player.name.string} ${DimBlocker.SAFE_SPOT[0]} ${DimBlocker.SAFE_SPOT[1]} ${DimBlocker.SAFE_SPOT[2]}`);
             player.tell("You cannot go there!");
         }
 
     })
 
-    schedule(event) // Repeat
+    DimBlocker.schedule(event) // Repeat
 
 })
 
 
 onEvent('server.tick', event => { // Initialize, pass event to scheduled function
-    if(scheduled == 0){
-        schedule(event);
-        scheduled = 1;
+    if(DimBlocker.scheduled == 0){
+        DimBlocker.schedule(event);
+        DimBlocker.scheduled = 1;
     }
 })

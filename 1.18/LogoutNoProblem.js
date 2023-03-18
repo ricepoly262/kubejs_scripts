@@ -1,10 +1,11 @@
 // Logout, No Problem!
 // Fixes some server hangs caused by entangled blocks when logging into a base
 // Requires Crash Utilities
+var logoutNP = {}
 
-const logout_filepath = 'kubejs/data/logoutnoproblem.json'
-const DEBUG = 0;
-const LNP_log = (str,a) => { if(a||DEBUG){console.log(`[LogoutNoProblem] ${str}`)} } // lol
+logoutNP.logout_filepath = 'kubejs/data/logoutnoproblem.json'
+logoutNP.DEBUG = 0;
+logoutNP.LNP_log = (str,a) => { if(a||logoutNP.DEBUG){console.log(`[LogoutNoProblem] ${str}`)} }
 
 onEvent("player.logged_out", (event) => {
     let dimension = event.level.dimension.toString()
@@ -14,23 +15,23 @@ onEvent("player.logged_out", (event) => {
     logInfo.y = event.player.y 
     logInfo.z = event.player.z
 
-    let data = JsonIO.read(logout_filepath);
+    let data = JsonIO.read(logoutNP.logout_filepath);
     if(data == null){
-        JsonIO.write({},logout_filepath) 
+        JsonIO.write({},logoutNP.logout_filepath) 
         data = {}
     }
     data[event.player.name.string] = logInfo;
-    JsonIO.write(logout_filepath, data);
+    JsonIO.write(logoutNP.logout_filepath, data);
 
-    LNP_log(`Sent ${event.player.name.string} to spawn! Original location: ${logInfo}`)
+    logoutNP.LNP_log(`Sent ${event.player.name.string} to spawn! Original location: ${logInfo}`)
     event.server.runCommandSilent(`cu unstuck ${event.player.name.string}`);
 });
 
 onEvent("player.logged_in", (event) => {
-    let data = JsonIO.read(logout_filepath);
+    let data = JsonIO.read(logoutNP.logout_filepath);
 
     if(data == null){
-        JsonIO.write({},logout_filepath)
+        JsonIO.write({},logoutNP.logout_filepath)
         data = {}
     }
 

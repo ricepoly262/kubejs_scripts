@@ -1,3 +1,4 @@
+// very simple script to log all commands to console
 onEvent('command.run', event => {
 
     if(event.getParseResults().context.getSource().entity){

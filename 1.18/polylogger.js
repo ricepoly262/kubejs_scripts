@@ -1,5 +1,10 @@
 var polylogger = {};
 
+
+// deprecated 
+
+
+
 polylogger.path = 'kubejs/data/polylogger/';
 polylogger.monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
