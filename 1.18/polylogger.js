@@ -8,50 +8,50 @@ var polylogger = {};
 polylogger.path = 'kubejs/data/polylogger/';
 polylogger.monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-function fileNameFromDate(date,type){
+function fileNameFromDate(date, type) {
     let filename = `${date.getDate()}_${polylogger.monthNames[date.getMonth()]}_${date.getFullYear()}`;
     return `${polylogger.path}${type}/${filename}.json`;
 }
 
 
-function readJson(type){
+function readJson(type) {
     let date = new Date();
-    let file = fileNameFromDate(date,type);
+    let file = fileNameFromDate(date, type);
 
     console.log(`Reading JSON file ${file}`);
     let read = JsonIO.read(file);
 
 
-    if(read==null){
-        console.log(`JSON file ${file} does not exist!`);     
+    if (read == null) {
+        console.log(`JSON file ${file} does not exist!`);
 
         let data = {};
         console.log(`Writing JSON file ${file}`);
         JsonIO.write(file, data);
 
         let test = JsonIO.read(`${file}`);
-        if(test==null){
+        if (test == null) {
             console.log(`Failed to write JSON file ${file}`);
-        }else{
+        } else {
             return test;
         }
-        
-    }else{
+
+    } else {
         return read;
     }
 
 }
 
-function writeJson(type,data,action){
+function writeJson(type, data, action) {
     let date = new Date();
     let time = `${date.getTime()} | ${date.getHours()}:00`;
-    let file = fileNameFromDate(date,type);
+    let file = fileNameFromDate(date, type);
     let log = readJson(type);
 
     log[time] = {};
     log[time].action = action;
     log[time].data = data;
-    
+
     console.log(`Writing JSON file ${file}`);
     JsonIO.write(`${file}`, log);
 }
@@ -62,53 +62,53 @@ onEvent('item.entity_interact', event => {
     let ply = event.player;
     let mob = event.getTarget();
     let item = event.getItem();
-    if(ply.isPlayer()){
-        if(!ply.isFake()){
+    if (ply.isPlayer()) {
+        if (!ply.isFake()) {
             let data = {};
             data.ply = ply.name.string;
             data.target = target.name.string;
             data.item = item.id;
-            data.playerpos = [Math.floor(ply.x),Math.floor(ply.y),Math.floor(ply.z),event.level.dimension];
-            data.targetpos = [Math.floor(mob.x),Math.floor(mob.y),Math.floor(mob.z),event.level.dimension];
+            data.playerpos = [Math.floor(ply.x), Math.floor(ply.y), Math.floor(ply.z), event.level.dimension];
+            data.targetpos = [Math.floor(mob.x), Math.floor(mob.y), Math.floor(mob.z), event.level.dimension];
 
-            writeJson('entity',data,"ENTITY INTERACTION")
+            writeJson('entity', data, "ENTITY INTERACTION")
         }
     }
 })
 
-onEvent('entity.death', event =>{
-    if(event.getSource().getPlayer()){
+onEvent('entity.death', event => {
+    if (event.getSource().getPlayer()) {
         let ply = event.getSource().getPlayer();
         let target = event.entity;
-        if(ply.isPlayer()){
-            if(!ply.isFake()){
+        if (ply.isPlayer()) {
+            if (!ply.isFake()) {
                 let data = {};
                 data.attacker = ply.name.string;
                 data.target = target.name.string;
-                data.playerpos = [Math.floor(ply.x),Math.floor(ply.y),Math.floor(ply.z),event.level.dimension];
-                data.targetpos = [Math.floor(target.x),Math.floor(target.y),Math.floor(target.z),event.level.dimension];
+                data.playerpos = [Math.floor(ply.x), Math.floor(ply.y), Math.floor(ply.z), event.level.dimension];
+                data.targetpos = [Math.floor(target.x), Math.floor(target.y), Math.floor(target.z), event.level.dimension];
 
-                writeJson('entity',data,"ENTITY KILL") ;
+                writeJson('entity', data, "ENTITY KILL");
             }
         }
     }
 })
 
-onEvent('entity.hurt', event =>{
-    if(event.getSource().getPlayer()){
+onEvent('entity.hurt', event => {
+    if (event.getSource().getPlayer()) {
         let ply = event.getSource().getPlayer();
         let amt = Math.round(event.getDamage());
         let target = event.entity;
-        if(ply.isPlayer()){
-            if(!ply.isFake()){
+        if (ply.isPlayer()) {
+            if (!ply.isFake()) {
                 let data = {};
                 data.attacker = ply.name.string;
                 data.target = target.name.string;
                 data.amount = amt;
-                data.playerpos = [Math.floor(ply.x),Math.floor(ply.y),Math.floor(ply.z),event.level.dimension];
-                data.targetpos = [Math.floor(target.x),Math.floor(target.y),Math.floor(target.z),event.level.dimension];
+                data.playerpos = [Math.floor(ply.x), Math.floor(ply.y), Math.floor(ply.z), event.level.dimension];
+                data.targetpos = [Math.floor(target.x), Math.floor(target.y), Math.floor(target.z), event.level.dimension];
 
-                writeJson('entity',data,"ENTITY ATTACK");
+                writeJson('entity', data, "ENTITY ATTACK");
             }
         }
     }
@@ -118,17 +118,17 @@ onEvent('entity.hurt', event =>{
 onEvent('block.break', event => {
     let block = event.block;
 
-    if(event.player.isPlayer()){
-        if(event.player + '' != 'rftools_builder'){
-            if(!event.player.isFake()){
+    if (event.player.isPlayer()) {
+        if (event.player + '' != 'rftools_builder') {
+            if (!event.player.isFake()) {
                 let ply = event.player;
                 let data = {};
                 data.ply = ply.name.string;
                 data.block = block.id;
-                data.playerpos = [Math.floor(ply.x),Math.floor(ply.y),Math.floor(ply.z),event.level.dimension];
+                data.playerpos = [Math.floor(ply.x), Math.floor(ply.y), Math.floor(ply.z), event.level.dimension];
                 data.blockpos = [block.x, block.y, block.z, event.level.dimension];
 
-                writeJson('block',data,'BLOCK BREAK');
+                writeJson('block', data, 'BLOCK BREAK');
             }
         }
     }
@@ -136,17 +136,17 @@ onEvent('block.break', event => {
 
 onEvent('block.place', event => {
     let block = event.block;
-    if(event.entity.isPlayer()){
-        if(event.entity + '' != 'rftools_builder'){
-            if(!event.entity.isFake()){
+    if (event.entity.isPlayer()) {
+        if (event.entity + '' != 'rftools_builder') {
+            if (!event.entity.isFake()) {
                 let ply = event.entity;
                 let data = {};
                 data.ply = ply.name.string;
                 data.block = block.id;
-                data.playerpos = [Math.floor(ply.x),Math.floor(ply.y),Math.floor(ply.z),event.level.dimension];
+                data.playerpos = [Math.floor(ply.x), Math.floor(ply.y), Math.floor(ply.z), event.level.dimension];
                 data.blockpos = [block.x, block.y, block.z, event.level.dimension];
 
-                writeJson('block',data,'BLOCK PLACE');
+                writeJson('block', data, 'BLOCK PLACE');
             }
         }
     }

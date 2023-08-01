@@ -15,27 +15,27 @@ backpacksjs.readJson = () => {
     let read = JsonIO.read(file);
 
 
-    if(read==null){
-        console.log(`JSON file ${file} does not exist!`);     
+    if (read == null) {
+        console.log(`JSON file ${file} does not exist!`);
 
         let data = {};
         console.log(`Writing JSON file ${file}`);
         JsonIO.write(file, data);
 
         let test = JsonIO.read(`${file}`);
-        if(test==null){
+        if (test == null) {
             console.log(`Failed to write JSON file ${file}`);
-        }else{
+        } else {
             return test;
         }
-        
-    }else{
+
+    } else {
         return read;
     }
 
 }
 
-backpacksjs.writeJson = (id,ply) => {
+backpacksjs.writeJson = (id, ply) => {
     let date = new Date();
     let time = `${date.getHours()}:00 | ${date.getDate()}, ${polylogger.monthNames[date.getMonth()]}, ${date.getFullYear()}`;
     let t = date.getTime();
@@ -45,7 +45,7 @@ backpacksjs.writeJson = (id,ply) => {
     log[t] = {};
     log[t].time = time;
     log[t].uuid = id.toString();
-    log[t].player = ply.name.string; 
+    log[t].player = ply.name.string;
     console.log("Writing JSON")
     JsonIO.write(`${file}`, log);
 }
@@ -53,9 +53,9 @@ backpacksjs.writeJson = (id,ply) => {
 
 
 backpacksjs.backpacks = ['sophisticatedbackpacks:backpack'];
-backpacksjs.tiers = ['iron','gold','diamond','netherite'];
+backpacksjs.tiers = ['iron', 'gold', 'diamond', 'netherite'];
 
-backpacksjs.tiers.forEach(t => {backpacksjs.backpacks.push(`sophisticatedbackpacks:${t}_backpack`)});
+backpacksjs.tiers.forEach(t => { backpacksjs.backpacks.push(`sophisticatedbackpacks:${t}_backpack`) });
 
 // thanks stack overflow
 backpacksjs.findDuplicates = items => items.reduce((acc, v, i, arr) => arr.indexOf(v) !== i && acc.indexOf(v) === -1 ? acc.concat(v) : acc, [])
@@ -72,15 +72,15 @@ backpacksjs.arrayFromInv = (inventoryObject) => {
 }
 
 // check for duplicates and remove them
-backpacksjs.checkForDuplicates = (inventoryObject,ply) => {
+backpacksjs.checkForDuplicates = (inventoryObject, ply) => {
     let items = [];
     let nbts = [];
     let inventory = backpacksjs.arrayFromInv(inventoryObject);
 
     inventory.forEach(item => { // sort inventory into just backpacks
         backpacksjs.backpacks.forEach(backpack => {
-            if(item.id == backpack){
-                if(item.nbt){
+            if (item.id == backpack) {
+                if (item.nbt) {
                     items.push(item);
                     nbts.push(item.nbt.contentsUuid.toString())
                 }
@@ -88,25 +88,25 @@ backpacksjs.checkForDuplicates = (inventoryObject,ply) => {
         })
     })
 
-    if(items.length>1){ // there is more than 1 backpack
-    
+    if (items.length > 1) { // there is more than 1 backpack
+
         let duplicates = backpacksjs.findDuplicates(nbts); // find duplicates
 
-        if(duplicates.length){ // there are duplicates
+        if (duplicates.length) { // there are duplicates
 
             var lastItem;
             var removed = false;
             items.forEach(item => { // loop through all the backpacks
-                if(duplicates.includes(item.nbt.contentsUuid.toString())){ // the backpack has an id that is in the duplicate id list
+                if (duplicates.includes(item.nbt.contentsUuid.toString())) { // the backpack has an id that is in the duplicate id list
                     inventoryObject.clear(item); // remove backpack
                     lastItem = item;
                     removed = true;
                 }
 
             })
-            if(removed){
+            if (removed) {
                 ply.give(lastItem); // because ALL duplicates are removed, we want to give at least 1 back
-                if(backpacksjs.useJSON){backpacksjs.writeJson(lastItem.nbt.contentsUuid,ply);}
+                if (backpacksjs.useJSON) { backpacksjs.writeJson(lastItem.nbt.contentsUuid, ply); }
             }
         }
 
@@ -115,5 +115,5 @@ backpacksjs.checkForDuplicates = (inventoryObject,ply) => {
 
 
 onEvent('player.inventory.closed', event => {
-    backpacksjs.checkForDuplicates(event.player.inventory,event.player);
+    backpacksjs.checkForDuplicates(event.player.inventory, event.player);
 })

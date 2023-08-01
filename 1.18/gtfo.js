@@ -7,7 +7,7 @@ gtfo.enabled = false;
 onEvent("player.logged_in", event => {
     let player = event.player;
 
-    if(gtfo.enabled == true) { if(!player.op){ player.kick("Come back another time") } };
+    if (gtfo.enabled == true) { if (!player.op) { player.kick("Come back another time") } };
 
 });
 
@@ -16,15 +16,15 @@ onEvent('server.custom_command', event => {
     let on = gtfo.enabled;
     if (p.op) {
         if (event.id == 'gtfo') {
-            if(on){
+            if (on) {
                 gtfo.enabled = false;
                 p.tell("Disabled");
             }
-            else{
+            else {
                 gtfo.enabled = true;
                 p.tell("Enabled");
             }
-        }       
+        }
     }
 
 })

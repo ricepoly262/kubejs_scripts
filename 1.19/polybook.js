@@ -4,31 +4,31 @@
 
 const POLYBOOK = true
 
-function isValid(obj){
-    if(obj == false){ return false; }
-    if(obj == undefined){return false; }
-    if(obj == null){ return false; }
-    return Object.keys(obj).length>0;
+function isValid(obj) {
+    if (obj == false) { return false; }
+    if (obj == undefined) { return false; }
+    if (obj == null) { return false; }
+    return Object.keys(obj).length > 0;
 }
 
-function hasKeys(obj){
-    return Object.keys(obj).length>0;
+function hasKeys(obj) {
+    return Object.keys(obj).length > 0;
 }
 
-function jwrite(path,data){
+function jwrite(path, data) {
     let oldData = JsonIO.read(path);
-    if(data === oldData){ return false; }
+    if (data === oldData) { return false; }
     JsonIO.write(path, data);
 
     let newData = JsonIO.read(path);
-    if(data === newData){ return true; }
-    return false; 
-    
+    if (data === newData) { return true; }
+    return false;
+
 }
 
-function getCachedName(ply){ 
-    if(!isValid(ply.persistentData.ricepoly.CachedName)){
+function getCachedName(ply) {
+    if (!isValid(ply.persistentData.ricepoly.CachedName)) {
         ply.persistentData.ricepoly.CachedName = ply.name.string;
-    } 
+    }
     return ply.persistentData.ricepoly.CachedName;
 }

@@ -8,28 +8,28 @@ chunkterminator.TIME_LIMIT = 259200; // Time limit before chunks get unloaded, h
 
 chunkterminator.playerList = {};
 chunkterminator.DEBUG = 0;
-chunkterminator.log = (str,a) => { if(a||chunkterminator.DEBUG){console.log(`[ChunkTerminator] ${str}`)} }
+chunkterminator.log = (str, a) => { if (a || chunkterminator.DEBUG) { console.log(`[ChunkTerminator] ${str}`) } }
 
 PlayerEvents.loggedIn(event => { // update entry when player joins
     let time = new Date();
     let ply = getCachedName(ply) //event.player.name.string;
 
     chunkterminator.log(`Updating/Adding entry for ${ply}`)
-    chunkterminator.addPlayer(ply,time);
+    chunkterminator.addPlayer(ply, time);
 });
 
 LevelEvents.loaded(event => { // check for players to unload on world load 
-    
+
     chunkterminator.getPlayers();
 
-    if(hasKeys(chunkterminator.playerList)){
+    if (hasKeys(chunkterminator.playerList)) {
         let currentTime = new Date();
 
-        chunkterminator.playerList.forEach( entry=> { 
+        chunkterminator.playerList.forEach(entry => {
             let entryTime = entry.time;
 
-            if((currentTime-entryTime)>chunkterminator.TIME_LIMIT){ // check if player has been offline for longer than threshhold
-                chunkterminator.unload(event.server,entry);
+            if ((currentTime - entryTime) > chunkterminator.TIME_LIMIT) { // check if player has been offline for longer than threshhold
+                chunkterminator.unload(event.server, entry);
             }
         });
     }
@@ -39,12 +39,12 @@ chunkterminator.getPlayers = () => { // get all players
 
     chunkterminator.log("Reading player list");
     chunkterminator.playerList = JsonIO.read(chunkterminator.unloader_filepath) || {};
-    
-    if(hasKeys(chunkterminator.playerList)){
+
+    if (hasKeys(chunkterminator.playerList)) {
         chunkterminator.log("Created new player list file");
         JsonIO.write(chunkterminator.unloader_filepath, {});
         chunkterminator.playerList = {};
-    }else{
+    } else {
         chunkterminator.log("Successfully read player list");
     }
 
@@ -53,36 +53,36 @@ chunkterminator.getPlayers = () => { // get all players
 chunkterminator.checkPlayer = (ply) => { // checks if a player exists on the list
     chunkterminator.getPlayers();
 
-    if( isValid(chunkterminator.playerList[ply]) ){ return true ; }
+    if (isValid(chunkterminator.playerList[ply])) { return true; }
 
     return false;
 }
 
-chunkterminator.addPlayer = (ply,time) => { // adds/updates a player on the list
+chunkterminator.addPlayer = (ply, time) => { // adds/updates a player on the list
     chunkterminator.getPlayers();
-    if( isValid(chunkterminator.playerList[ply]) ){
+    if (isValid(chunkterminator.playerList[ply])) {
         let last = chunkterminator.playerList[ply].time;
         chunkterminator.playerList[ply].time = time;
 
         JsonIO.write(chunkterminator.unloader_filepath, chunkterminator.playerList);
-    
+
         let check = chunkterminator.checkPlayer(ply); // ensure it was updated properly
 
-        if(check && (chunkterminator.playerList[ply].time!==last) ){
+        if (check && (chunkterminator.playerList[ply].time !== last)) {
             chunkterminator.log(`Entry updated for ${ply}`);
             return true;
         }
         return false;
     }
-    else{
+    else {
         chunkterminator.playerList[ply] = {};
         chunkterminator.playerList[ply].time = time;
-    
+
         JsonIO.write(chunkterminator.unloader_filepath, chunkterminator.playerList);
-    
+
         let check = chunkterminator.checkPlayer(ply); // ensure it was added properly
 
-        if(check){
+        if (check) {
             chunkterminator.log(`Entry added for ${ply}`);
             return true;
         }
@@ -91,10 +91,10 @@ chunkterminator.addPlayer = (ply,time) => { // adds/updates a player on the list
 }
 
 
-chunkterminator.unload = (server,ply) => { // unloads a player's chunks
+chunkterminator.unload = (server, ply) => { // unloads a player's chunks
     chunkterminator.getPlayers();
-    
-    if( isValid(chunkterminator.playerList[ply]) ){
+
+    if (isValid(chunkterminator.playerList[ply])) {
         chunkterminator.log("No player list file found or file empty");
         return false;
     }
@@ -102,7 +102,7 @@ chunkterminator.unload = (server,ply) => { // unloads a player's chunks
     chunkterminator.playerList[ply] = undefined;
 
     JsonIO.write(chunkterminator.unloader_filepath, chunkterminator.playerList);
-    
+
     chunkterminator.getPlayers();
     chunkterminator.log(`Unloading ${ply}`);
     server.runCommand(`ftbchunks unload_all ${ply}`);
